@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Social Media Downloader | ErAnkit</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --secondary: #ff0055;
+            --dark-bg: #050505;
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --border-glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.1) 0%, transparent 40%);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- 1. HERO BRANDING SECTION --- */
+        .header-section {
+            text-align: center;
+            padding: 50px 0 30px;
+            position: relative;
+        }
+        
+        /* Developer Name (Massive & Glowing) */
+        .dev-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            background: linear-gradient(to bottom, #fff, #a5f3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.6)) drop-shadow(0 0 40px rgba(0, 210, 255, 0.3));
+            margin-bottom: 5px;
+            animation: glowPulse 3s infinite alternate;
+        }
+
+        .site-title {
+            font-size: 1.5rem;
+            color: #ccc;
+            letter-spacing: 2px;
+            font-weight: 300;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .source-credit {
+            font-size: 0.9rem;
+            color: #666;
+            background: rgba(255,255,255,0.05);
+            padding: 5px 15px;
+            border-radius: 50px;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .highlight { color: var(--secondary); font-weight: bold; }
+
+        /* --- 2. PLATFORM CARDS --- */
+        .grid-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .platform-card {
+            background: var(--card-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 25px;
+            padding: 35px 20px;
+            text-align: center;
+            cursor: pointer;
+            backdrop-filter: blur(15px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .platform-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        .platform-card:hover::before { opacity: 1; }
+
+        .p-icon { font-size: 3.5rem; margin-bottom: 15px; transition: 0.3s; }
+        .platform-card:hover .p-icon { transform: scale(1.1); text-shadow: 0 0 20px currentColor; }
+
+        /* --- 3. INPUT SECTION --- */
+        #inputSection { display: none; animation: slideUp 0.6s ease-out; }
+        
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .back-btn {
+            background: none; border: 1px solid rgba(255,255,255,0.2);
+            color: #aaa; padding: 8px 20px; border-radius: 50px;
+            margin-bottom: 20px; transition: 0.3s;
+        }
+        .back-btn:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.05); }
+
+        .custom-input {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 18px 25px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .custom-input:focus {
+            background: rgba(0,0,0,0.5);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+            outline: none;
+        }
+
+        .btn-process {
+            margin-top: 20px;
+            width: 100%;
+            padding: 18px;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), #006aff);
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 106, 255, 0.3);
+        }
+        .btn-process:hover { transform: scale(1.02); box-shadow: 0 10px 40px rgba(0, 210, 255, 0.5); }
+
+        /* --- 4. RESULTS --- */
+        .thumb-box img {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        /* Buttons */
+        .btn-dl {
+            display: flex; align-items: center; justify-content: center;
+            padding: 15px; border-radius: 12px; text-decoration: none;
+            font-weight: 700; transition: 0.3s; margin-bottom: 10px;
+        }
+        
+        .btn-best {
+            background: linear-gradient(90deg, #00f260, #0575E6);
+            color: white; font-size: 1.1rem;
+            box-shadow: 0 5px 20px rgba(0, 242, 96, 0.3);
+        }
+        .btn-best:hover { transform: translateY(-3px); color: white; box-shadow: 0 10px 30px rgba(0, 242, 96, 0.5); }
+
+        .btn-audio {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+        .btn-audio:hover { background: var(--secondary); color: white; }
+
+        .quality-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin: 15px 0;
+        }
+        .chip {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #ccc; padding: 8px; border-radius: 8px; text-align: center;
+            font-size: 0.9rem; text-decoration: none; transition: 0.2s;
+        }
+        .chip:hover { background: rgba(255,255,255,0.1); border-color: #fff; color: #fff; }
+
+        /* Loader */
+        .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: var(--primary); border-radius: 50%; display: none; margin: 30px auto; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes glowPulse { from { filter: drop-shadow(0 0 10px rgba(0,210,255,0.4)); } to { filter: drop-shadow(0 0 25px rgba(0,210,255,0.8)); } }
+
+        /* Media Query for Mobile Font Size */
+        @media (max-width: 768px) {
+            .dev-name { font-size: 3.5rem; }
+            .site-title { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container pb-5">
+    
+    <div class="header-section">
+        <h1 class="dev-name">ErAnkit</h1>
+        <h2 class="site-title">All Social Media Downloader</h2>
+        <div class="source-credit">Source Code: <span class="highlight">EHCODER</span></div>
+    </div>
+
+    <div id="platformGrid" class="row g-4 grid-container justify-content-center mt-2">
+        <div class="col-6 col-md-3" onclick="openInput('Instagram')">
+            <div class="platform-card">
+                <div class="p-icon" style="color:#e1306c"><i class="fa-brands fa-instagram"></i></div>
+                <h5>Instagram</h5>
+            </div>
+        </div>
+        <div class="col-6 col-md-3" onclick="openInput('YouTube')">
+            <div class="platform-card">
+                <div class="p-icon" style="color:#ff0000"><i class="fa-brands fa-youtube"></i></div>
+                <h5>YouTube</h5>
+            </div>
+        </div>
+        <div class="col-6 col-md-3" onclick="openInput('Facebook')">
+            <div class="platform-card">
+                <div class="p-icon" style="color:#1877f2"><i class="fa-brands fa-facebook"></i></div>
+                <h5>Facebook</h5>
+            </div>
+        </div>
+        <div class="col-6 col-md-3" onclick="openInput('Other')">
+            <div class="platform-card">
+                <div class="p-icon" style="color:#fff"><i class="fa-solid fa-link"></i></div>
+                <h5>Any Link</h5>
+            </div>
+        </div>
+    </div>
+
+    <div id="inputSection" class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
+            
+            <div class="glass-panel">
+                <h3 class="text-center mb-4">Paste <span id="platformName" style="color:var(--primary)">Link</span> Below</h3>
+                
+                <input type="text" id="urlInput" class="custom-input" placeholder="Paste URL here (e.g., https://...)" autocomplete="off">
+                <button class="btn-process" onclick="fetchDetails()">
+                    <i class="fa-solid fa-bolt"></i> Process Video
+                </button>
+                
+                <div id="loader" class="loader"></div>
+                <div id="errorMsg" class="alert alert-danger mt-4 text-center" style="display:none; background:rgba(255,0,0,0.1); border-color:rgba(255,0,0,0.3); color:#ff9999;"></div>
+
+                <div id="resultSection" class="mt-5" style="display:none;">
+                    <div class="row align-items-center">
+                        <div class="col-md-5 mb-3 mb-md-0 thumb-box">
+                            <img id="vidThumb" src="" alt="Thumbnail">
+                        </div>
+                        <div class="col-md-7">
+                            <h4 id="vidTitle" class="fw-bold mb-2"></h4>
+                            <p class="small text-white-50 mb-4">
+                                <i class="fa-regular fa-clock"></i> <span id="vidDuration"></span> | 
+                                <i class="fa-solid fa-server"></i> <span id="vidSource"></span>
+                            </p>
+                            
+                            <div class="d-grid gap-2">
+                                <a id="btnBest" href="#" class="btn-dl btn-best">
+                                    <i class="fa-solid fa-download me-2"></i> Download HD (Max Quality)
+                                </a>
+                            </div>
+
+                            <p class="text-white-50 small mt-3 mb-1 fw-bold text-uppercase">Other Qualities:</p>
+                            <div id="qualityContainer" class="quality-grid"></div>
+
+                            <div class="d-grid mt-3">
+                                <a id="btnAudio" href="#" class="btn-dl btn-audio">
+                                    <i class="fa-solid fa-music me-2"></i> Convert to Audio (MP3)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <div class="text-center mt-5 text-white-50 small">
+        &copy; 2024 All Social Media Downloader | Designed by ErAnkit
+    </div>
+
+</div>
+
+<script>
+    // --- UI LOGIC ---
+    function openInput(platform) {
+        document.getElementById('platformGrid').style.display = 'none';
+        document.getElementById('inputSection').style.display = 'block';
+        document.getElementById('platformName').innerText = platform;
+        document.getElementById('urlInput').value = '';
+        document.getElementById('resultSection').style.display = 'none';
+    }
+
+    function goBack() {
+        document.getElementById('inputSection').style.display = 'none';
+        document.getElementById('platformGrid').style.display = 'flex';
+        // Reset Error & Loader
+        document.getElementById('errorMsg').style.display = 'none';
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    // --- DOWNLOAD LOGIC ---
+    async function fetchDetails() {
+        const url = document.getElementById('urlInput').value;
+        const loader = document.getElementById('loader');
+        const resultSection = document.getElementById('resultSection');
+        const errorMsg = document.getElementById('errorMsg');
+        const qualityContainer = document.getElementById('qualityContainer');
+
+        if(!url) {
+            alert("Please paste a link first!");
+            return;
+        }
+
+        // UI States
+        loader.style.display = 'block';
+        resultSection.style.display = 'none';
+        errorMsg.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('url', url);
+
+        try {
+            const response = await fetch('/get-info', { method: 'POST', body: formData });
+            const result = await response.json();
+            
+            loader.style.display = 'none';
+
+            if(result.status === 'success') {
+                const data = result.data;
+                
+                // Set Data
+                document.getElementById('vidTitle').innerText = data.title + " | ErAnkit";
+                document.getElementById('vidThumb').src = data.thumbnail;
+                document.getElementById('vidDuration').innerText = data.duration;
+                document.getElementById('vidSource').innerText = data.platform;
+
+                const encodedUrl = encodeURIComponent(data.original_url);
+
+                // 1. BEST QUALITY BTN
+                document.getElementById('btnBest').href = `/process-download?url=${encodedUrl}&mode=video&quality=best`;
+                
+                // 2. AUDIO BTN
+                document.getElementById('btnAudio').href = `/process-download?url=${encodedUrl}&mode=audio`;
+
+                // 3. QUALITY CHIPS
+                qualityContainer.innerHTML = '';
+                if (data.qualities && data.qualities.length > 0) {
+                    data.qualities.forEach(q => {
+                        qualityContainer.innerHTML += `
+                            <a href="/process-download?url=${encodedUrl}&mode=video&quality=${q}" class="chip">
+                                ${q}p
+                            </a>`;
+                    });
+                } else {
+                    qualityContainer.innerHTML = '<span class="text-muted small">Standard Only</span>';
+                }
+
+                resultSection.style.display = 'block';
+
+            } else {
+                errorMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${result.message}`;
+                errorMsg.style.display = 'block';
+            }
+
+        } catch (err) {
+            loader.style.display = 'none';
+            errorMsg.innerText = "Server Error: Unable to connect.";
+            errorMsg.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>
