@@ -9,23 +9,27 @@ import shutil
 app = Flask(__name__)
 CORS(app)
 
-# Downloads folder
-if not os.path.exists('downloads'):
-    os.makedirs('downloads')
+# --- CONFIGURATION ---
+DOWNLOAD_FOLDER = 'downloads'
+if not os.path.exists(DOWNLOAD_FOLDER):
+    os.makedirs(DOWNLOAD_FOLDER)
 
-# --- SABSE IMPORTANT SETUP ---
-# Hum zabardasti current folder me ffmpeg dhundenge
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FFMPEG_PATH = os.path.join(BASE_DIR, 'ffmpeg.exe')
+# --- FFmpeg Auto-Detect (Windows vs Linux Fix) ---
+# Pehle system me check karo (Render ke liye)
+FFMPEG_PATH = shutil.which("ffmpeg")
 
-print("------------------------------------------------")
-if os.path.exists(FFMPEG_PATH):
-    print(f"✅ SUCCESS: FFmpeg mil gaya yahan: {FFMPEG_PATH}")
-    print("   Ab High Quality Merge kaam karega!")
-else:
-    print(f"❌ ERROR: FFmpeg nahi mila yahan: {FFMPEG_PATH}")
-    print("   Please 'ffmpeg.exe' ko isi folder me paste karein!")
-print("------------------------------------------------")
+# Agar system me nahi mila, to local file check karo (Windows ke liye)
+if not FFMPEG_PATH:
+    local_ffmpeg = os.path.join(os.getcwd(), 'ffmpeg.exe')
+    if os.path.exists(local_ffmpeg):
+        FFMPEG_PATH = local_ffmpeg
+
+print(f"\n[SYSTEM CHECK]")
+print(f"FFmpeg Path: {FFMPEG_PATH if FFMPEG_PATH else '❌ NOT FOUND'}")
+# Cookies check
+COOKIES_FILE = os.path.join(os.getcwd(), 'cookies.txt')
+print(f"Cookies File: {'✅ FOUND' if os.path.exists(COOKIES_FILE) else '❌ NOT FOUND'}")
+print("------------------------------------------------\n")
 
 def clean_filename(title):
     cleaned = title.encode('ascii', 'ignore').decode('ascii')
@@ -41,17 +45,22 @@ def get_info():
     url = request.form.get('url')
     if not url: return jsonify({'status': 'error', 'message': 'Please enter a link!'})
 
+    # Cookies Option
+    cookie_ops = {}
+    if os.path.exists(COOKIES_FILE):
+        cookie_ops = {'cookiefile': COOKIES_FILE}
+
     try:
         ydl_opts = {
             'quiet': True, 
             'no_warnings': True,
-            'extractor_args': {'youtube': {'player_client': ['android', 'ios']}}
+            'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+            **cookie_ops
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             
-            # Formats Scan
             formats = info.get('formats', [])
             available_qualities = set()
             for f in formats:
@@ -72,7 +81,7 @@ def get_info():
                 }
             })
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
+        return jsonify({'status': 'error', 'message': 'Bot Blocked: Cookies Required on Server'})
 
 @app.route('/process-download')
 def process_download():
@@ -82,22 +91,22 @@ def process_download():
     
     timestamp = int(time.time())
     
-    # Check FFmpeg again before download
-    if not os.path.exists(FFMPEG_PATH) and mode != 'audio':
-        return "<h1>Error: ffmpeg.exe missing!</h1><p>Folder check karein. Bina FFmpeg ke High Quality merge nahi hoga.</p>", 500
-
+    # Options setup
     common_opts = {
         'quiet': True,
         'no_warnings': True,
-        'ffmpeg_location': FFMPEG_PATH, # Zabardasti Path
-        'extractor_args': {'youtube': {'player_client': ['android', 'ios']}}
+        'ffmpeg_location': FFMPEG_PATH, # Auto-detected path
+        'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
     }
+
+    if os.path.exists(COOKIES_FILE):
+        common_opts['cookiefile'] = COOKIES_FILE
 
     if mode == 'audio':
         ydl_opts = {
             **common_opts,
             'format': 'bestaudio/best',
-            'outtmpl': f'downloads/{timestamp}_%(title)s.%(ext)s',
+            'outtmpl': f'{DOWNLOAD_FOLDER}/{timestamp}_%(title)s.%(ext)s',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -105,7 +114,6 @@ def process_download():
             }],
         }
     else:
-        # VIDEO LOGIC
         if quality == 'best':
             format_str = 'bestvideo+bestaudio/best'
         else:
@@ -114,7 +122,7 @@ def process_download():
         ydl_opts = {
             **common_opts,
             'format': format_str,
-            'outtmpl': f'downloads/{timestamp}_%(title)s.%(ext)s',
+            'outtmpl': f'{DOWNLOAD_FOLDER}/{timestamp}_%(title)s.%(ext)s',
             'merge_output_format': 'mp4',
         }
 
@@ -144,7 +152,6 @@ def process_download():
         clean_title = clean_filename(info.get('title', 'video'))
         branding_name = f"{clean_title}_By_ErAnkit{dl_name_ext}"
         
-        # FIX FOR FLASK VERSION ERROR
         try:
             return send_file(final_filename, as_attachment=True, download_name=branding_name)
         except TypeError:
